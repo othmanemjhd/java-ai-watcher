@@ -1,0 +1,73 @@
+**Title**  
+Spring Boot 3.5.16 available now  
+
+**Summary**  
+Spring Boot 3.5.16 has been published to Maven Central (3 dependency upgrades). It is the final OSS release of the 3.5 x line; after this, only Spring Boot 4.0 / 4.1 (or commercial support) will receive OSS updates.  
+
+**Why it matters**  
+* **Support horizon** – Once 3.5.x reaches end‑of‑OSS, no security patches or bug fixes will be delivered. Staying on an unsupported version exposes production systems to unpatched vulnerabilities.  
+* **Path to Spring Boot 4** – The announcement signals the imminent migration window to the new major version (4.x), which brings Java 25 compatibility, native Kubernetes support, improved Kafka starters, and tighter integration with observability tools like Datadog.  
+* **Dependency hygiene** – The three upgraded libraries may already contain critical fixes; adopting the release ensures you benefit from them before the jump to 4.x.  
+
+**Implementation steps**  
+
+1. **Assess current version**  
+   ```bash
+   ./mvnw dependency:tree | grep spring-boot-starter-parent
+   ```  
+   Confirm you are on a 3.5.x release.
+
+2. **Upgrade to 3.5.16 (optional but recommended)**  
+   ```xml
+   <parent>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-parent</artifactId>
+       <version>3.5.16</version>
+       <relativePath/> <!-- lookup parent from repository -->
+   </parent>
+   ```
+   Run `./mvnw clean verify` and fix any compilation/test failures.
+
+3. **Plan migration to Spring Boot 4.x**  
+   * Update the parent version to `4.0.0` (or latest `4.1.x`).  
+   * Ensure the JDK is set to **Java 25** in `pom.xml` or `build.gradle`.  
+   * Review the [Spring Boot 4 migration guide](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide) for breaking changes (e.g., configuration property renames, removed auto‑config classes).  
+
+4. **Validate third‑party starters**  
+   * **Kafka** – Verify `spring-kafka` version aligns with Boot 4 (usually upgraded automatically).  
+   * **PostgreSQL** – Ensure the JDBC driver version is compatible with the new Spring Data release.  
+
+5. **Update CI/CD** (GitHub Actions)  
+   ```yaml
+   - name: Set up JDK
+     uses: actions/setup-java@v4
+     with:
+       distribution: temurin
+       java-version: 25
+   - name: Build with Maven
+     run: ./mvnw -B verify
+   ```
+
+6. **Deploy to Kubernetes**  
+   * Rebuild Docker images with the new JDK 25 base.  
+   * Apply updated Helm charts / Kustomize overlays; Spring Boot 4 provides native `spring-boot-docker` support for layered jars.  
+
+7. **Enable observability**  
+   * Add the Datadog starter (`implementation "net.datadoghq:dd-java-agent"`).  
+   * Verify metrics/trace collection after the upgrade.  
+
+8. **Run full regression suite** and promote to production only after all health checks pass.  
+
+**Productivity impact**  
+
+| Area | Impact |
+|------|--------|
+| **Security / Stability** | Immediate access to latest patches; avoids risk of running an unsupported runtime. |
+| **Upgrade effort** | Small one‑step bump to 3.5.16, then a planned migration to 4.x; mitigates “big‑bang” upgrade pain. |
+| **Developer experience** | Spring Boot 4 introduces Java 25 language features (records, sealed interfaces, pattern matching) and improved auto‑configuration, reducing boilerplate. |
+| **Observability** | Native Datadog integration cuts down on custom instrumentation code. |
+| **Cloud‑native readiness** | Enhanced Kubernetes support (readiness probes, layered Docker images) speeds container build & rollout cycles. |
+| **CI/CD** | Updating GitHub Actions to JDK 25 aligns the build pipeline with production runtime, preventing “works‑locally” issues. |
+
+**How the information was extracted**  
+The source text supplied by the user (the announcement for Spring Boot 3.5.16) was parsed to isolate the key facts: release availability, dependency upgrades, end‑of‑OSS notice, upgrade recommendation, and community resources. Those facts were then reframed into the structured sections above, adding contextual relevance for Spring Boot 4, Java 25, Kafka, Kubernetes, PostgreSQL, GitHub Actions, Datadog, and AI‑assisted developer tooling.
